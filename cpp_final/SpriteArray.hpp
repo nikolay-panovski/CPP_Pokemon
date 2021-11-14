@@ -1,16 +1,16 @@
 #pragma once
 
 #include "GameObject.hpp"
+#include "SpriteObject.hpp"
 
-class SpriteObject : public GameObject {
+class SpriteArray : public GameObject {
 	private:
-		std::string spriteFilename;
-		sf::Texture texture;
-		sf::Sprite sprite;
+		std::vector<SpriteObject*> sprites;
+		SpriteObject* activeSprite;
 
 	public:
-		SpriteObject(Vec2f startPosition, std::string textureFilename);
-		~SpriteObject();
+		SpriteArray(std::string* filenames[]);
+		~SpriteArray();
 
 		std::string GetSpriteFilename(void) const;
 		Vec2f GetPosition(void) const override;

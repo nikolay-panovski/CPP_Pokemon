@@ -146,6 +146,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneHandler.cpp" />
+    <ClCompile Include="SpriteArray.cpp" />
     <ClCompile Include="SpriteObject.cpp" />
     <ClCompile Include="TextObject.cpp" />
   </ItemGroup>
@@ -156,6 +157,7 @@
     <ClInclude Include="HighscoreList.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneHandler.hpp" />
+    <ClInclude Include="SpriteArray.hpp" />
     <ClInclude Include="SpriteObject.hpp" />
     <ClInclude Include="TextObject.hpp" />
   </ItemGroup>

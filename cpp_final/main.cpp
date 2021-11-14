@@ -46,7 +46,6 @@ int main(int argCount, char* argVals[]) {
 
     SpriteObject background(Vec2f(0.0f, 0.0f), "Assets/battle-background-sunny-hillsx4.png");
 
-    SpriteObject* sprArray = new SpriteObject[8];
     
     Scene mainMenu("menuScene");
     Scene charMenu("charCreateScene");

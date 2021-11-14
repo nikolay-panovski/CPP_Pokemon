@@ -1,8 +1,6 @@
+#pragma once
+
 #include "SpriteObject.hpp"
-
-SpriteObject::SpriteObject() {
-
-}
 
 SpriteObject::SpriteObject(Vec2f startPosition, std::string textureFilename) :
 	GameObject() {
