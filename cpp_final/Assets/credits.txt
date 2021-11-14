@@ -1,0 +1,8 @@
+usage in game - file name - copyright/attribution notice line OR author name @ opengameart - page URL
+
+* Character sprites - rpgcritters2.png - Stephen "Redshrike" Challener, hosted by OpenGameArt.org - https://opengameart.org/content/10-basic-rpg-enemies
+* Fight screen background - battle-background-sunny-hillsx4.png - made by ansimuz.com - https://opengameart.org/content/battle-background-hazy-hills-0
+* Buttons - blue_button00.png, ,  - Kenney (www.kenney.nl) - https://www.kenney.nl/assets/ui-pack
+
+* N/A (UI) - - made by ansimuz.com - https://opengameart.org/content/battle-background-hazy-hills-0
+* N/A - parallax_forest_pack - ansimuz - https://opengameart.org/content/forest-background
