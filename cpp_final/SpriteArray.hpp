@@ -2,6 +2,7 @@
 
 #include "GameObject.hpp"
 #include "SpriteObject.hpp"
+#include <initializer_list>
 
 class SpriteArray : public GameObject {
 	private:
@@ -9,10 +10,7 @@ class SpriteArray : public GameObject {
 		SpriteObject* activeSprite;
 
 	public:
-		template<typename T>
-		SpriteArray(T nextFilename);
-		template<typename T, typename... Args>
-		SpriteArray(T nextFilename, Args... filenames);
+		SpriteArray(std::initializer_list<std::string> il);
 		~SpriteArray();
 
 		std::string GetActiveSpriteFilename(void) const;

@@ -47,10 +47,10 @@ int main(int argCount, char* argVals[]) {
 
     SpriteObject background(Vec2f(0.0f, 0.0f), "Assets/battle-background-sunny-hillsx4.png");
 
-    SpriteArray charSprites("Assets/rpgcritters2_1.png", "Assets/rpgcritters2_2.png", "Assets/rpgcritters2_3.png",
+    SpriteArray charSprites{"Assets/rpgcritters2_1.png", "Assets/rpgcritters2_2.png", "Assets/rpgcritters2_3.png",
                             "Assets/rpgcritters2_4.png", "Assets/rpgcritters2_5.png", "Assets/rpgcritters2_6.png",
                             "Assets/rpgcritters2_7.png", "Assets/rpgcritters2_8.png", "Assets/rpgcritters2_9.png",
-                            "Assets/rpgcritters2_10.png");
+                            "Assets/rpgcritters2_10.png"};
     
     Scene mainMenu("menuScene");
     Scene charMenu("charCreateScene");
@@ -203,7 +203,8 @@ int main(int argCount, char* argVals[]) {
     mainMenu.AddGameObject(quitButton);
 
     charMenu.AddGameObject(background);
-    charMenu.AddGameObject(player);
+    //charMenu.AddGameObject(player);
+    charMenu.AddGameObject(charSprites);
     charMenu.AddGameObject(totalPoints);
     charMenu.AddGameObject(strPoints);
     charMenu.AddGameObject(strDecButton);

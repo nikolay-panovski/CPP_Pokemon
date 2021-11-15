@@ -2,21 +2,15 @@
 
 #include "SpriteArray.hpp"
 
-template<typename T>
-SpriteArray::SpriteArray(T filename) 
+SpriteArray::SpriteArray(std::initializer_list<std::string> il)
 	: GameObject() {
-	sprites.push_back(&SpriteObject(this->GetPosition(), *filename));
-}
-
-template<typename T, typename... Args>
-SpriteArray::SpriteArray(T nextFilename, Args... filenames) 
-	: GameObject() {
-	sprites.push_back(&SpriteObject(this->GetPosition(), *nextFilename));
-	// bound to get executed every time - if in above template, will probably point to the last added object
-	// (not that it would matter with *this* usage, but still)
+	for (const std::string* it = begin(il); it != end(il); it++) {
+		// can't avoid new, deal with this in memory!
+		// TODO: fix positioning definition
+		SpriteObject* sprFromFilename = new SpriteObject(/*this->GetPosition()*/ Vec2f(0.0f, 0.0f), *it);
+		sprites.push_back(sprFromFilename);
+	}
 	activeSprite = sprites[0];
-	SpriteArray(filenames);
-	printf("Address of SpriteArray: %p", &this);
 }
 
 SpriteArray::~SpriteArray() {}
