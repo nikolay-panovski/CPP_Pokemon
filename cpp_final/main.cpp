@@ -9,6 +9,7 @@
 #include "SceneHandler.hpp"
 #include "TextObject.hpp"
 #include "SpriteObject.hpp"
+#include "SpriteArray.hpp"
 #include "Button.hpp"
 
 
@@ -46,11 +47,15 @@ int main(int argCount, char* argVals[]) {
 
     SpriteObject background(Vec2f(0.0f, 0.0f), "Assets/battle-background-sunny-hillsx4.png");
 
+    SpriteArray charSprites("Assets/rpgcritters2_1.png", "Assets/rpgcritters2_2.png", "Assets/rpgcritters2_3.png",
+                            "Assets/rpgcritters2_4.png", "Assets/rpgcritters2_5.png", "Assets/rpgcritters2_6.png",
+                            "Assets/rpgcritters2_7.png", "Assets/rpgcritters2_8.png", "Assets/rpgcritters2_9.png",
+                            "Assets/rpgcritters2_10.png");
     
     Scene mainMenu("menuScene");
     Scene charMenu("charCreateScene");
 
-    Character player(Vec2f(PADDING_BIG, PADDING_BIG), font, "Player", "Assets/rpgcritters2.png", 8, true);
+    Character player(Vec2f(PADDING_BIG, PADDING_BIG), font, "Player", "Assets/rpgcritters2_1.png", 8, true);
     // ---- END GLOBAL OBJECTS ----
 
     // ---- SCENE 1 OBJECTS ----
