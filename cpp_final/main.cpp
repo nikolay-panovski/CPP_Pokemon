@@ -190,6 +190,9 @@ int main(int argCount, char* argVals[]) {
         //handler.AddScene(mainMenu);
         });
 
+    TextObject errorText(Vec2f(window.getSize().x * 0.5f, window.getSize().y * 0.5f + PADDING_BIG * 4),
+        font, "");
+
     Button fightButton(Vec2f(window.getSize().x - DEFAULT_BTN_SIZE.x - PADDING_BIG,
                              window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_SMALL),
                        font, "Play", "Assets/blue_button00.png");
@@ -197,7 +200,16 @@ int main(int argCount, char* argVals[]) {
     fightButton.SetButtonAction([&playButton, /*&window,*/ &mainMenu, &handler]() {
         playButton.ToggleActive();
         handler.PopCurrentScene();
-        //handler.AddScene(mainMenu);
+        /**
+        if (player.VerifyMinStats()) {
+        charMenu.RemoveGameObject(errorText);
+        //handler.AddScene(fightScreen);
+        }
+        else {
+        charMenu.AddGameObject(errorText);
+        errorText.SetText("Strength and Wits points cannot be 0, redistribute!");
+        }
+        /**/
         });
 
     // ---- END SCENE 2 ----
@@ -231,6 +243,7 @@ int main(int argCount, char* argVals[]) {
     charMenu.AddGameObject(witsDecButton);
     charMenu.AddGameObject(witsIncButton);
     charMenu.AddGameObject(randButton);
+    charMenu.AddGameObject(errorText);
     charMenu.AddGameObject(fightButton);
 
     // ---- END ADD ----
