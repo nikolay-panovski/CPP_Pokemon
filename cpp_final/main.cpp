@@ -55,8 +55,12 @@ int main(int argCount, char* argVals[]) {
     
     Scene mainMenu("menuScene");
     Scene charMenu("charCreateScene");
+    Scene fightScreen("fightScene");
 
-    Character player(Vec2f(PADDING_BIG, PADDING_BIG), font, "Player", "Assets/rpgcritters2_1.png", 8, true);
+    Character player(Vec2f(PADDING_BIG, window.getSize().y * 0.5f), 
+                    font, "Player", "Assets/rpgcritters2_1.png", 8, true);
+    Character enemy(Vec2f(window.getSize().x - PADDING_BIG, window.getSize().y * 0.5f), 
+                    font, "Enemy", "Assets/rpgcritters2_4.png", 6, false);
     // ---- END GLOBAL OBJECTS ----
 
     // ---- SCENE 1 OBJECTS ----
@@ -197,22 +201,27 @@ int main(int argCount, char* argVals[]) {
                              window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_SMALL),
                        font, "Play", "Assets/blue_button00.png");
 
-    fightButton.SetButtonAction([&playButton, /*&window,*/ &mainMenu, &handler]() {
+    fightButton.SetButtonAction([&playButton, &player, &charMenu, &handler, &errorText, &fightScreen]() {
         playButton.ToggleActive();
         handler.PopCurrentScene();
-        /**
+        
         if (player.VerifyMinStats()) {
-        charMenu.RemoveGameObject(errorText);
-        //handler.AddScene(fightScreen);
+            charMenu.RemoveGameObject(errorText);
+            handler.AddScene(fightScreen);
         }
         else {
-        charMenu.AddGameObject(errorText);
-        errorText.SetText("Strength and Wits points cannot be 0, redistribute!");
+            charMenu.AddGameObject(errorText);
+            errorText.SetText("Strength and Wits points cannot be 0, redistribute!");
         }
-        /**/
+        
         });
 
     // ---- END SCENE 2 ----
+
+    // ---- SCENE 3 OBJECTS ----
+
+
+    // ---- END SCENE 3 ----
 
 
     // ---- ADD SCENES TO HANDLER / OBJECTS TO SCENE ----
@@ -228,10 +237,10 @@ int main(int argCount, char* argVals[]) {
     mainMenu.AddGameObject(quitButton);
 
     charMenu.AddGameObject(background);
-    charMenu.AddGameObject(sprArrayDecButton);
-    charMenu.AddGameObject(sprArrayIncButton);
-    //charMenu.AddGameObject(player);
-    charMenu.AddGameObject(charSprites);
+    //charMenu.AddGameObject(sprArrayDecButton);
+    //charMenu.AddGameObject(sprArrayIncButton);
+    charMenu.AddGameObject(player);
+    //charMenu.AddGameObject(charSprites);
     charMenu.AddGameObject(totalPoints);
     charMenu.AddGameObject(strPoints);
     charMenu.AddGameObject(strDecButton);
@@ -245,6 +254,10 @@ int main(int argCount, char* argVals[]) {
     charMenu.AddGameObject(randButton);
     charMenu.AddGameObject(errorText);
     charMenu.AddGameObject(fightButton);
+
+    fightScreen.AddGameObject(background);
+    fightScreen.AddGameObject(player);
+    fightScreen.AddGameObject(enemy);
 
     // ---- END ADD ----
 
