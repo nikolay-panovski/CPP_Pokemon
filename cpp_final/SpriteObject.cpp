@@ -11,7 +11,13 @@ SpriteObject::SpriteObject(Vec2f startPosition, std::string textureFilename) :
 	this->SetPosition(startPosition);
 }
 
-SpriteObject::~SpriteObject() {}
+SpriteObject::~SpriteObject() {
+	/**
+	printf_s("SpriteObject at address %p destroyed.\n", this);
+	// line below returns 344. smallest (but not only) difference between array SpriteObjects is 188, though.
+	printf_s("Size of this SpriteObject: %i\n", sizeof(SpriteObject));
+	/**/
+}
 
 std::string SpriteObject::GetSpriteFilename(void) const {
 	return this->spriteFilename;
