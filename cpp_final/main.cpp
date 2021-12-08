@@ -47,10 +47,11 @@ int main(int argCount, char* argVals[]) {
 
     SpriteObject background(Vec2f(0.0f, 0.0f), "Assets/battle-background-sunny-hillsx4.png");
 
-    SpriteArray charSprites{"Assets/rpgcritters2_1.png", "Assets/rpgcritters2_2.png", "Assets/rpgcritters2_3.png",
+    SpriteArray charSprites{Vec2f(PADDING_BIG * 2.0f, PADDING_BIG * 2.0f),
+                            {"Assets/rpgcritters2_1.png", "Assets/rpgcritters2_2.png", "Assets/rpgcritters2_3.png",
                             "Assets/rpgcritters2_4.png", "Assets/rpgcritters2_5.png", "Assets/rpgcritters2_6.png",
                             "Assets/rpgcritters2_7.png", "Assets/rpgcritters2_8.png", "Assets/rpgcritters2_9.png",
-                            "Assets/rpgcritters2_10.png"};
+                            "Assets/rpgcritters2_10.png"} };
     
     Scene mainMenu("menuScene");
     Scene charMenu("charCreateScene");
@@ -95,7 +96,19 @@ int main(int argCount, char* argVals[]) {
 
 
     // ---- SCENE 2 OBJECTS ----
-    
+    Button sprArrayDecButton(Vec2f(charSprites.GetPosition().x - PADDING_BIG, charSprites.GetPosition().y),
+                            font, "", "Assets/grey_arrowDownGrey.png");
+
+    sprArrayDecButton.SetButtonAction([&charSprites]() {
+        charSprites.DecrementActiveSprite();
+        });
+
+    Button sprArrayIncButton(Vec2f(charSprites.GetPosition().x + PADDING_BIG, charSprites.GetPosition().y),
+        font, "", "Assets/grey_arrowUpGrey.png");
+
+    sprArrayIncButton.SetButtonAction([&charSprites]() {
+        charSprites.IncrementActiveSprite();
+        });
 
     TextObject totalPoints(Vec2f(window.getSize().x * 0.5f, window.getSize().y * 0.5f - PADDING_BIG),
                            font, "Total points: " + std::to_string(player.GetStat(Character::CharStat::SkillPts)));
@@ -181,7 +194,7 @@ int main(int argCount, char* argVals[]) {
                              window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_SMALL),
                        font, "Play", "Assets/blue_button00.png");
 
-    fightButton.SetButtonAction([&playButton, &window, &mainMenu, &handler]() {
+    fightButton.SetButtonAction([&playButton, /*&window,*/ &mainMenu, &handler]() {
         playButton.ToggleActive();
         handler.PopCurrentScene();
         //handler.AddScene(mainMenu);
@@ -203,6 +216,8 @@ int main(int argCount, char* argVals[]) {
     mainMenu.AddGameObject(quitButton);
 
     charMenu.AddGameObject(background);
+    charMenu.AddGameObject(sprArrayDecButton);
+    charMenu.AddGameObject(sprArrayIncButton);
     //charMenu.AddGameObject(player);
     charMenu.AddGameObject(charSprites);
     charMenu.AddGameObject(totalPoints);
