@@ -19,6 +19,9 @@ HighscoreList::HighscoreList(Vec2f startPosition, sf::Font& startFont) :
             std::getline(myfileRead, line);
             names.push_back(line);
         }
+
+        // unhandled middle case - file exists and is readable and some games were played, but not at least 5
+        // (so some scores are still default 0 - fill them in properly!)
         
         myfileRead.close();
     }
@@ -65,8 +68,13 @@ void HighscoreList::Render(sf::RenderWindow& window) {
 void HighscoreList::TryAddHighscore(int newScore) {
 	for (unsigned int i = 0; i < highscores.size(); i++) {
 		if (newScore > highscores[i]) {
-			highscores[i] = newScore;
+			highscores.emplace(highscores.begin() + i, newScore);
+            highscores.pop_back();
             // todo: add according name of player to names vector
+            //names.emplace(names.begin() + i, /*NAME PARAMETER HERE*/);
+            //names.pop_back();
+
+            //this->GenerateRankList();
 			break;
 		}
 	}
