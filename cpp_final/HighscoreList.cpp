@@ -34,15 +34,17 @@ HighscoreList::HighscoreList(Vec2f startPosition, sf::Font& startFont) :
     this->GenerateRankList();
 
     for (int i = 0; i < this->maxSize; i++) {
-        printf("rankTexts[%i] address: %p\n", i, &rankTexts[i]);
-        printf("rankTexts[%i] text value: %s\n", i, rankTexts[i].GetText().c_str());
+        printf("rankTexts[%i] address: %p\n", i, rankTexts[i]);
+        printf("rankTexts[%i] text value: %s\n", i, rankTexts[i]->GetText().c_str());
     }
 
     
 }
 
 HighscoreList::~HighscoreList() {
-    // try to make sure that the objects created with new will be destroyed
+    for (unsigned int i = 0; i < rankTexts.size(); i++) {
+        delete rankTexts[i];
+    }
     rankTexts.clear();
 }
 
@@ -56,7 +58,7 @@ void HighscoreList::SetPosition(Vec2f newPosition) {
 
 void HighscoreList::Render(sf::RenderWindow& window) {
     for (int i = 0; i < this->maxSize; i++) {
-        rankTexts[i].Render(window);
+        rankTexts[i]->Render(window);
     }
 }
 
@@ -76,7 +78,7 @@ void HighscoreList::GenerateRankList(void) {
     for (int i = 0; i < this->maxSize; i++) {
         TextObject* newRank = new TextObject(Vec2f(this->GetPosition().x, this->GetPosition().y + i * 60), font,
             std::to_string(i + 1) + " " + names[i] + "        " + std::to_string(highscores[i]));
-        rankTexts.push_back(*newRank);
+        rankTexts.push_back(newRank);
         //printf("newRank address: %p\n", &newRank);
     }
 }

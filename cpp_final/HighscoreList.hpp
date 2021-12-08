@@ -11,7 +11,8 @@ class HighscoreList : public GameObject {
 		Vec2f position;
 		std::vector<int> highscores;
 		std::vector<std::string> names;
-		std::vector<TextObject> rankTexts;
+		// formerly std::vector<TextObject>, changed because of creation of ranks with "new" (which returns pointers)
+		std::vector<TextObject*> rankTexts;
 
 	public:
 		HighscoreList(Vec2f startPosition, sf::Font& startFont);
