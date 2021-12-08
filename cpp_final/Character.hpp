@@ -58,6 +58,8 @@ class Character : public GameObject {
 
 		int maxHP = 0;
 		int hp = 0;
+		int maxSanity = 0;
+		int sanity = 0;
 
 		// secondary stat here
 
@@ -90,6 +92,8 @@ class Character : public GameObject {
 		void ResetStats(void);
 		void RandomizeStats(void);
 		void CompareFightStartAgil(Character& other);
+		bool VerifyMinStats(void);
+		void VerifyStatsFromCharPts(void);
 
 		void ExportCharacter(void);
 

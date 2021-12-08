@@ -141,6 +141,17 @@ void Character::CompareFightStartAgil(Character& other) {
 	else this->hasCurrentTurn = true;
 }
 
+bool Character::VerifyMinStats(void) {
+	if (this->strPoints > 0 && this->agilPoints > 0) return true;
+	else return false;
+}
+
+// according to the "example game" game design document
+void Character::VerifyStatsFromCharPts(void) {
+	this->maxHP = this->strPoints * 3;
+	this->maxSanity = this->witsPoints * 2;
+}
+
 
 void Character::ExportCharacter(void) {
 	std::ofstream exporter;
