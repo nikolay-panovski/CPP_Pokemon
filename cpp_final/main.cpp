@@ -137,6 +137,10 @@ int main(int argCount, char* argVals[]) {
         (Vec2f(totalPoints->GetPosition().x - PADDING_BIG * 4, totalPoints->GetPosition().y + PADDING_BIG),
                font, std::to_string(player->GetStat(Character::CharStat::StrPts)));
 
+    std::unique_ptr<TextObject> strLabel = std::make_unique<TextObject>
+        (Vec2f(strPoints->GetPosition().x - PADDING_BIG, strPoints->GetPosition().y + PADDING_BIG),
+            font, "Strength");
+
     std::unique_ptr<Button> strDecButton = std::make_unique<Button>
         (Vec2f(strPoints->GetPosition().x - PADDING_BIG, strPoints->GetPosition().y),
                font, "", "Assets/grey_arrowDownGrey.png");
@@ -161,6 +165,10 @@ int main(int argCount, char* argVals[]) {
         (Vec2f(totalPoints->GetPosition().x, totalPoints->GetPosition().y + PADDING_BIG),
                font, std::to_string(player->GetStat(Character::CharStat::AgilPts)));
 
+    std::unique_ptr<TextObject> agilLabel = std::make_unique<TextObject>
+        (Vec2f(agilPoints->GetPosition().x - PADDING_BIG, agilPoints->GetPosition().y + PADDING_BIG),
+            font, "Agility");
+
     std::unique_ptr<Button> agilDecButton = std::make_unique<Button>
         (Vec2f(agilPoints->GetPosition().x - PADDING_BIG, agilPoints->GetPosition().y),
                font, "", "Assets/grey_arrowDownGrey.png");
@@ -184,6 +192,10 @@ int main(int argCount, char* argVals[]) {
     std::unique_ptr<TextObject> witsPoints = std::make_unique<TextObject>
         (Vec2f(totalPoints->GetPosition().x + PADDING_BIG * 4, totalPoints->GetPosition().y + PADDING_BIG),
                font, std::to_string(player->GetStat(Character::CharStat::WitsPts)));
+
+    std::unique_ptr<TextObject> witsLabel = std::make_unique<TextObject>
+        (Vec2f(witsPoints->GetPosition().x - PADDING_BIG, witsPoints->GetPosition().y + PADDING_BIG),
+            font, "Wits");
 
     std::unique_ptr<Button> witsDecButton = std::make_unique<Button>
         (Vec2f(witsPoints->GetPosition().x - PADDING_BIG, witsPoints->GetPosition().y),
@@ -227,11 +239,11 @@ int main(int argCount, char* argVals[]) {
     std::unique_ptr<Button> fightButton = std::make_unique<Button>
         (Vec2f(window.getSize().x - DEFAULT_BTN_SIZE.x - PADDING_BIG,
                window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_SMALL),
-               font, "Play", "Assets/blue_button00.png");
+               font, "Fight", "Assets/blue_button00.png");
 
     fightButton->SetButtonAction([&playButton, &player, &charMenu, &handler, &errorText, &fightScreen]() {
         playButton->ToggleActive();
-        handler->PopCurrentScene();
+        //handler->PopCurrentScene();
         
         if (player->VerifyMinStats()) {
             charMenu->RemoveGameObject(*errorText);
@@ -246,8 +258,47 @@ int main(int argCount, char* argVals[]) {
 
     // ---- END SCENE 2 ----
 
-    // ---- SCENE 3 OBJECTS ----
+    // ---- SCENE 3 (UNIQUE) OBJECTS ----
+    std::unique_ptr<Button> attackButton = std::make_unique<Button>
+        (Vec2f(DEFAULT_BTN_SIZE.x,
+            window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_BIG * 2),
+            font, "Attack", "Assets/blue_button00.png");
 
+    attackButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
+        
+        });
+
+    std::unique_ptr<Button> healButton = std::make_unique<Button>
+        (Vec2f(attackButton->GetPosition().x + PADDING_BIG * 4, attackButton->GetPosition().y),
+            font, "Heal", "Assets/blue_button00.png");
+
+    healButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
+
+        });
+
+    std::unique_ptr<Button> prepareButton = std::make_unique<Button>
+        (Vec2f(healButton->GetPosition().x + PADDING_BIG * 4, healButton->GetPosition().y),
+            font, "Prepare", "Assets/blue_button00.png");
+
+    prepareButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
+
+        });
+
+    std::unique_ptr<Button> castMagicButton = std::make_unique<Button>
+        (Vec2f(prepareButton->GetPosition().x + PADDING_BIG * 4, prepareButton->GetPosition().y),
+            font, "Cast Magic", "Assets/blue_button00.png");
+
+    castMagicButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
+
+        });
+
+    std::unique_ptr<Button> quitBattleButton = std::make_unique<Button>
+        (Vec2f(window.getSize().x - PADDING_BIG * 4, window.getSize().y - PADDING_SMALL * 4),
+            font, "Quit Battle", "Assets/blue_button00.png");
+
+    quitBattleButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
+
+        });
 
     // ---- END SCENE 3 ----
 
@@ -271,12 +322,15 @@ int main(int argCount, char* argVals[]) {
     //charMenu->AddGameObject(charSprites);
     charMenu->AddGameObject(*totalPoints);
     charMenu->AddGameObject(*strPoints);
+    charMenu->AddGameObject(*strLabel);
     charMenu->AddGameObject(*strDecButton);
     charMenu->AddGameObject(*strIncButton);
     charMenu->AddGameObject(*agilPoints);
+    charMenu->AddGameObject(*agilLabel);
     charMenu->AddGameObject(*agilDecButton);
     charMenu->AddGameObject(*agilIncButton);
     charMenu->AddGameObject(*witsPoints);
+    charMenu->AddGameObject(*witsLabel);
     charMenu->AddGameObject(*witsDecButton);
     charMenu->AddGameObject(*witsIncButton);
     charMenu->AddGameObject(*randButton);
@@ -286,6 +340,11 @@ int main(int argCount, char* argVals[]) {
     fightScreen->AddGameObject(*background);
     fightScreen->AddGameObject(*player);
     fightScreen->AddGameObject(*enemy);
+    fightScreen->AddGameObject(*attackButton);
+    fightScreen->AddGameObject(*healButton);
+    fightScreen->AddGameObject(*prepareButton);
+    fightScreen->AddGameObject(*castMagicButton);
+    fightScreen->AddGameObject(*quitBattleButton);
 
     // ---- END ADD ----
 

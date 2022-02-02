@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <random>
+#include <time.h>
 #include "Character.hpp"
 
 #define OFFSET Vec2f(-25.0f, 50.0f)
@@ -128,6 +129,9 @@ void Character::ResetStats(void) {
 }
 
 void Character::RandomizeStats(void) {
+	// RNG with current time as seed (NULL means the returned time will not be stored anywhere)
+	srand(time(NULL));
+	
 	this->strPoints = rand() % (this->totalSkillPoints / 2) + 1;
 	this->witsPoints = rand() % (this->totalSkillPoints / 2) + 1;
 	this->totalSkillPoints -= this->strPoints;
@@ -144,7 +148,7 @@ void Character::CompareFightStartAgil(Character& other) {
 }
 
 bool Character::VerifyMinStats(void) {
-	if (this->strPoints > 0 && this->agilPoints > 0) return true;
+	if (this->strPoints > 0 && this->witsPoints > 0) return true;
 	else return false;
 }
 
