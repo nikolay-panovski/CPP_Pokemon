@@ -241,13 +241,16 @@ int main(int argCount, char* argVals[]) {
                window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_SMALL),
                font, "Fight", "Assets/blue_button00.png");
 
-    fightButton->SetButtonAction([&playButton, &player, &charMenu, &handler, &errorText, &fightScreen]() {
+    fightButton->SetButtonAction([&playButton, &player, &enemy, &charMenu, &handler, &errorText, &fightScreen]() {
         playButton->ToggleActive();
         //handler->PopCurrentScene();
         
         if (player->VerifyMinStats()) {
             charMenu->RemoveGameObject(*errorText);
             handler->AddScene(*fightScreen);
+            player->CompareFightStartAgil(*enemy);
+            player->VerifyStatsFromCharPts();
+            enemy->VerifyStatsFromCharPts();
         }
         else {
             charMenu->AddGameObject(*errorText);
@@ -259,13 +262,34 @@ int main(int argCount, char* argVals[]) {
     // ---- END SCENE 2 ----
 
     // ---- SCENE 3 (UNIQUE) OBJECTS ----
+    std::unique_ptr<TextObject> playerActiveLabel = std::make_unique<TextObject>
+        (Vec2f(player->GetPosition().x - PADDING_BIG, player->GetPosition().y + PADDING_BIG * 2),
+            font, "Active: " + std::to_string(player->hasCurrentTurn));
+
+    std::unique_ptr<TextObject> enemyActiveLabel = std::make_unique<TextObject>
+        (Vec2f(enemy->GetPosition().x - PADDING_BIG, enemy->GetPosition().y + PADDING_BIG * 2),
+            font, "Active: " + std::to_string(enemy->hasCurrentTurn));
+
+    std::unique_ptr<Button> updateActiveInfoButton = std::make_unique<Button>
+        (Vec2f(DEFAULT_BTN_SIZE.x,
+            DEFAULT_BTN_SIZE.y + PADDING_BIG * 2),
+            font, "UpdateActiveText", "Assets/blue_button00.png");
+
+    updateActiveInfoButton->SetButtonAction([&player, &enemy, &playerActiveLabel, &enemyActiveLabel]() {
+        playerActiveLabel->SetText("Active: " + std::to_string(player->hasCurrentTurn));
+        enemyActiveLabel->SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
+        });
+
     std::unique_ptr<Button> attackButton = std::make_unique<Button>
         (Vec2f(DEFAULT_BTN_SIZE.x,
             window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_BIG * 2),
             font, "Attack", "Assets/blue_button00.png");
 
-    attackButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
-        
+    attackButton->SetButtonAction([&player, &enemy]() {
+        if (player->hasCurrentTurn) {
+            player->Attack(*enemy);
+        }
+        else enemy->Attack(*player);
         });
 
     std::unique_ptr<Button> healButton = std::make_unique<Button>
@@ -340,6 +364,9 @@ int main(int argCount, char* argVals[]) {
     fightScreen->AddGameObject(*background);
     fightScreen->AddGameObject(*player);
     fightScreen->AddGameObject(*enemy);
+    fightScreen->AddGameObject(*playerActiveLabel);     // debug
+    fightScreen->AddGameObject(*enemyActiveLabel);       // debug
+    fightScreen->AddGameObject(*updateActiveInfoButton);       // debug
     fightScreen->AddGameObject(*attackButton);
     fightScreen->AddGameObject(*healButton);
     fightScreen->AddGameObject(*prepareButton);

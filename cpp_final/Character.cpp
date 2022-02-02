@@ -1,7 +1,11 @@
 #pragma once
 
+// this is how they created the Celeste player class
+
 #include <fstream>
 #include <random>
+#include <math.h>
+#include <algorithm>
 #include <time.h>
 #include "Character.hpp"
 
@@ -13,6 +17,9 @@ Character::Character(Vec2f startPosition, sf::Font& startFont, std::string nameT
 	totalSkillPoints(totalSP), isPlayer(isPlayerChar) {
 	if (isPlayer == false) {
 		this->RandomizeStats();
+		//printf_s("\nEnemy strength: %i", this->strPoints);
+		//printf_s("\nEnemy agility: %i", this->agilPoints);
+		//printf_s("\nEnemy wits: %i", this->witsPoints);
 	}
 }
 
@@ -26,6 +33,8 @@ void Character::SetPosition(Vec2f newPosition) {
 	this->charName.SetPosition(newPosition);
 	this->charSprite.SetPosition(newPosition);
 }
+
+/* DIRECT STATS FUNCTIONS */
 
 int Character::GetStat(Character::CharStat stat) const {
 	switch (stat) {
@@ -52,6 +61,8 @@ int Character::GetStat(Character::CharStat stat) const {
 	}
 }
 
+// this next code (INCs/DECs) is tailored to fail Software Architecture with a grade of "Does not have a brain"
+// only use this signature on character screen
 void Character::IncrementStat(Character::CharStat stat) {
 	if (this->totalSkillPoints > 0) {
 		switch (stat) {
@@ -81,6 +92,36 @@ void Character::IncrementStat(Character::CharStat stat) {
 				break;
 		}
 	}
+}
+
+// only use this signature on fight screen
+void Character::IncrementStat(Character::CharStat stat, int value) {
+		switch (stat) {
+			case Character::CharStat::SkillPts:
+				this->totalSkillPoints += value;
+				break;
+			case Character::CharStat::StrPts:
+				this->strPoints += value;
+				//do not do this here?
+				this->totalSkillPoints -= value;
+				break;
+			case Character::CharStat::AgilPts:
+				this->agilPoints += value;
+				this->totalSkillPoints -= value;
+				break;
+			case Character::CharStat::WitsPts:
+				this->witsPoints += value;
+				this->totalSkillPoints -= value;
+				break;
+			case Character::CharStat::CurHP:
+				this->hp += value;
+				break;
+			case Character::CharStat::MaxHP:
+				this->maxHP += value;
+				break;
+			default:
+				break;
+		}
 }
 
 void Character::DecrementStat(Character::CharStat stat) {
@@ -121,6 +162,43 @@ void Character::DecrementStat(Character::CharStat stat) {
 	}
 }
 
+void Character::DecrementStat(Character::CharStat stat, int value) {
+	switch (stat) {
+		case Character::CharStat::SkillPts:
+			this->totalSkillPoints -= value;
+			break;
+		case Character::CharStat::StrPts:
+			if (this->strPoints > 0) {
+				this->strPoints -= value;
+				//do not do this here?
+				this->totalSkillPoints += value;
+			}
+			break;
+		case Character::CharStat::AgilPts:
+			if (this->agilPoints > 0) {
+				this->agilPoints -= value;
+				this->totalSkillPoints += value;
+			}
+			break;
+		case Character::CharStat::WitsPts:
+			if (this->witsPoints > 0) {
+				this->witsPoints -= value;
+				this->totalSkillPoints += value;
+			}
+			break;
+		case Character::CharStat::CurHP:
+			if (this->hp > 0) {
+				this->hp -= value;
+			}
+			break;
+		case Character::CharStat::MaxHP:
+			this->maxHP -= value;
+			break;
+		default:
+			break;
+	}
+}
+
 void Character::ResetStats(void) {
 	this->totalSkillPoints += (this->strPoints + this->agilPoints + this->witsPoints);
 	this->strPoints = 0;
@@ -155,8 +233,31 @@ bool Character::VerifyMinStats(void) {
 // according to the "example game" game design document
 void Character::VerifyStatsFromCharPts(void) {
 	this->maxHP = this->strPoints * 3;
+	this->hp = this->maxHP;
 	this->maxSanity = this->witsPoints * 2;
+	this->sanity = this->maxSanity;
 }
+
+/* END DIRECT STATS FUNCTIONS */
+
+/* FIGHT ACTIONS FUNCTIONS */
+
+void Character::Attack(Character& other) {
+	int component1 = this->strPoints;
+	int component2 = (rand() % 4 + 1);
+	int component3 = ceil(other.GetStat(Character::CharStat::StrPts) / 2);
+
+	other.DecrementStat(Character::CharStat::CurHP, 
+		std::max(component1 + component2 - component3, 1));
+
+	//printf_s("\ncomponent1 = %i", component1);
+	//printf_s("\ncomponent2 = %i", component2);
+	//printf_s("\ncomponent3 = %i", component3);
+	//printf_s("\nPlayer HP: %i", this->hp);
+	//printf_s("\nEnemy HP: %i", other.hp);
+}
+
+/* END FIGHT ACTIONS FUNCTIONS */
 
 
 void Character::ExportCharacter(void) {

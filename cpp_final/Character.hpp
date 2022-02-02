@@ -88,12 +88,16 @@ class Character : public GameObject {
 
 		int GetStat(Character::CharStat stat) const;
 		void IncrementStat(Character::CharStat stat);
+		void IncrementStat(Character::CharStat stat, int value);
 		void DecrementStat(Character::CharStat stat);
+		void DecrementStat(Character::CharStat stat, int value);
 		void ResetStats(void);
 		void RandomizeStats(void);
 		void CompareFightStartAgil(Character& other);
 		bool VerifyMinStats(void);
 		void VerifyStatsFromCharPts(void);
+
+		void Attack(Character& other);
 
 		void ExportCharacter(void);
 
