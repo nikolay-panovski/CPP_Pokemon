@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <memory>
 
+typedef sf::Vector2f Vec2f;
+
 #include "Character.hpp"
 #include "HighscoreList.hpp"
 #include "Scene.hpp"
@@ -21,7 +23,6 @@
 #define PADDING_BIG 50
 #define PADDING_SMALL 25
 #define START_SCENE mainMenu
-typedef sf::Vector2f Vec2f;
 
 
 // !16KB of stack used by 1 function result in a warning. turn over to pointers.

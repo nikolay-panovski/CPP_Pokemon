@@ -4,9 +4,11 @@
 #include <random>
 #include "Character.hpp"
 
+#define OFFSET Vec2f(-25.0f, 50.0f)
+
 Character::Character(Vec2f startPosition, sf::Font& startFont, std::string nameText, std::string textureFilename,
 					 int totalSP, bool isPlayerChar) :
-	charName(startPosition, startFont, nameText), charSprite(startPosition, textureFilename),
+	charName(startPosition + OFFSET, startFont, nameText), charSprite(startPosition, textureFilename),
 	totalSkillPoints(totalSP), isPlayer(isPlayerChar) {
 	if (isPlayer == false) {
 		this->RandomizeStats();
