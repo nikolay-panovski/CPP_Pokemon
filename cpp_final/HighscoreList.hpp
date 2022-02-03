@@ -23,6 +23,9 @@ class HighscoreList : public GameObject {
 
 		void Render(sf::RenderWindow& window) override;
 
-		void TryAddHighscore(int newScore);
+		void TryAddHighscore(int newScore, std::string playerName);
 		void GenerateRankList(void);
+		void ExportScores(void);
+		void ResetList(void);
+		void ClearList(void);
 };

@@ -19,19 +19,13 @@ HighscoreList::HighscoreList(Vec2f startPosition, sf::Font& startFont) :
             std::getline(myfileRead, line);
             names.push_back(line);
         }
-
-        // unhandled middle case - file exists and is readable and some games were played, but not at least 5
-        // (so some scores are still default 0 - fill them in properly!)
         
         myfileRead.close();
     }
 
     else {
         // file does not yet exist OR failed to open etc. - no scores for you!
-        for (int i = 0; i < this->maxSize; i++) {
-            highscores.push_back(0);
-            names.push_back("Player");
-        }
+        this->ResetList();
     }
 
     this->GenerateRankList();
@@ -45,10 +39,7 @@ HighscoreList::HighscoreList(Vec2f startPosition, sf::Font& startFont) :
 }
 
 HighscoreList::~HighscoreList() {
-    for (unsigned int i = 0; i < rankTexts.size(); i++) {
-        delete rankTexts[i];
-    }
-    rankTexts.clear();
+    this->ClearList();
 }
 
 Vec2f HighscoreList::GetPosition(void) const {
@@ -65,23 +56,22 @@ void HighscoreList::Render(sf::RenderWindow& window) {
     }
 }
 
-void HighscoreList::TryAddHighscore(int newScore) {
+void HighscoreList::TryAddHighscore(int newScore, std::string playerName) {
 	for (unsigned int i = 0; i < highscores.size(); i++) {
 		if (newScore > highscores[i]) {
 			highscores.emplace(highscores.begin() + i, newScore);
             highscores.pop_back();
-            // todo: add according name of player to names vector
-            //names.emplace(names.begin() + i, /*NAME PARAMETER HERE*/);
-            //names.pop_back();
+            names.emplace(names.begin() + i, playerName);
+            names.pop_back();
 
-            //this->GenerateRankList();
+            this->GenerateRankList();
 			break;
 		}
 	}
 }
 
 void HighscoreList::GenerateRankList(void) {
-    rankTexts.clear();
+    this->ClearList();
 
     for (int i = 0; i < this->maxSize; i++) {
         TextObject* newRank = new TextObject(Vec2f(this->GetPosition().x, this->GetPosition().y + i * 60), font,
@@ -89,4 +79,34 @@ void HighscoreList::GenerateRankList(void) {
         rankTexts.push_back(newRank);
         //printf("newRank address: %p\n", &newRank);
     }
+}
+
+void HighscoreList::ExportScores(void) {
+    std::ofstream writeLine;
+    writeLine.open("highscore.cmgt");
+
+    for (int i = 0; i < this->maxSize; i++) {
+        writeLine << std::to_string(highscores[i]) << "\n";
+        writeLine << names[i] << "\n";
+    }
+    writeLine.close();
+}
+
+void HighscoreList::ResetList(void) {
+    this->ClearList();
+    highscores.clear();
+    names.clear();
+
+
+    for (int i = 0; i < this->maxSize; i++) {
+        highscores.push_back(0);
+        names.push_back("Player " + std::to_string(i + 1));
+    }
+}
+
+void HighscoreList::ClearList(void) {
+    for (unsigned int i = 0; i < rankTexts.size(); i++) {
+        delete rankTexts[i];
+    }
+    rankTexts.clear();
 }

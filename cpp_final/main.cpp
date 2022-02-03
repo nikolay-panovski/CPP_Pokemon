@@ -57,6 +57,10 @@ int main(int argCount, char* argVals[]) {
 
     // ---- IMPORTANT GLOBAL OBJECTS (SCENES ETC.) ----
 
+    int score = 0;
+    bool isFightActive = false;
+    bool hasPlayerWon = false;
+
     std::unique_ptr<SceneHandler> handler = std::make_unique<SceneHandler>();
 
     std::unique_ptr<SpriteObject> background = std::make_unique<SpriteObject>(Vec2f(0.0f, 0.0f), "Assets/battle-background-sunny-hillsx4.png");
@@ -73,7 +77,7 @@ int main(int argCount, char* argVals[]) {
     std::unique_ptr<Scene> fightScreen = std::make_unique<Scene>("fightScene");
 
     std::unique_ptr<Character> player = std::make_unique<Character>(Vec2f(PADDING_BIG * 2, window.getSize().y * 0.5f - PADDING_BIG),
-                    font, "Player", "Assets/rpgcritters2_1.png", 8, true);
+                    font, "Main", "Assets/rpgcritters2_1.png", 8, true);
     std::unique_ptr<Character> enemy = std::make_unique<Character>(Vec2f(window.getSize().x - PADDING_BIG * 4, window.getSize().y * 0.5f - PADDING_BIG),
                     font, "Enemy", "Assets/rpgcritters2_4.png", 6, false);
     // ---- END GLOBAL OBJECTS ----
@@ -89,7 +93,7 @@ int main(int argCount, char* argVals[]) {
                font, "Play", "Assets/blue_button00.png");
 
     playButton->SetButtonAction([&playButton, &charMenu, &handler]() {
-        playButton->ToggleActive();
+        //playButton->ToggleActive();
         handler->AddScene(charMenu.get());
         });
 
@@ -107,6 +111,7 @@ int main(int argCount, char* argVals[]) {
 
     eraseButton->SetButtonAction([&scores]() {
         remove("highscore.cmgt");
+        scores->ResetList();
         scores->GenerateRankList();
         });
 
@@ -243,14 +248,23 @@ int main(int argCount, char* argVals[]) {
         (Vec2f(window.getSize().x * 0.5f, window.getSize().y * 0.5f + PADDING_BIG * 4),
                font, "");
 
+    std::unique_ptr<Button> cancelButton = std::make_unique<Button>
+        (Vec2f(DEFAULT_BTN_SIZE.x + PADDING_BIG,
+            window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_SMALL),
+            font, "Cancel", "Assets/blue_button00.png");
+
+    cancelButton->SetButtonAction([&handler]() {
+        handler->PopCurrentScene();
+        });
+
     std::unique_ptr<Button> fightButton = std::make_unique<Button>
         (Vec2f(window.getSize().x - DEFAULT_BTN_SIZE.x - PADDING_BIG,
                window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_SMALL),
                font, "Fight", "Assets/blue_button00.png");
 
-    fightButton->SetButtonAction([&playButton, &player, &enemy, &charMenu, &handler, &errorText, &fightScreen]() {
-        playButton->ToggleActive();
-        //handler->PopCurrentScene();
+    fightButton->SetButtonAction([&playButton, &player, &enemy, &charMenu, &handler, &errorText, &fightScreen,
+                                  &isFightActive]() {
+        //playButton->ToggleActive();
         
         if (player->VerifyMinStats()) {
             charMenu->RemoveGameObject(*errorText);
@@ -269,6 +283,8 @@ int main(int argCount, char* argVals[]) {
                 + "/" + std::to_string(player->GetStat(Character::CharStat::MaxSanity)));
             enemy->sanityLabel.SetText("Sanity: " + std::to_string(enemy->GetStat(Character::CharStat::CurSanity))
                 + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxSanity)));
+
+            isFightActive = true;
 
         }
         else {
@@ -303,8 +319,26 @@ int main(int argCount, char* argVals[]) {
             window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_BIG * 2),
             font, "Attack", "Assets/blue_button00.png");
 
-    attackButton->SetButtonAction([&player, &enemy, &textAreaText]() {
-        if (player->hasCurrentTurn) {
+    attackButton->SetButtonAction([&player, &enemy, &textAreaText,
+                                   &isFightActive, &hasPlayerWon]() {
+            if (isFightActive == false && hasPlayerWon == true) {
+                enemy->ResetStats();
+                enemy->RandomizeStats();
+                enemy->VerifyStatsFromCharPts();
+                player->CompareFightStartAgil(*enemy);
+
+                enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
+                    + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
+                enemy->sanityLabel.SetText("Sanity: " + std::to_string(enemy->GetStat(Character::CharStat::CurSanity))
+                    + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxSanity)));
+
+                isFightActive = true;
+                hasPlayerWon = false;
+
+                textAreaText->SetText("Ready to start battle!");
+            }
+
+        else if (isFightActive == true && player->hasCurrentTurn) {
             int dmg = player->Attack(*enemy);
             enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
                 + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
@@ -325,8 +359,8 @@ int main(int argCount, char* argVals[]) {
         (Vec2f(attackButton->GetPosition().x + PADDING_BIG * 4, attackButton->GetPosition().y),
             font, "Heal", "Assets/blue_button00.png");
 
-    healButton->SetButtonAction([&player, &enemy, &textAreaText]() {
-        if (player->hasCurrentTurn) {
+    healButton->SetButtonAction([&player, &enemy, &textAreaText, &isFightActive]() {
+        if (isFightActive == true && player->hasCurrentTurn) {
             Vec2i heals = player->Heal();
             enemy->wasAttackedLastTurn = false;
             player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
@@ -351,8 +385,8 @@ int main(int argCount, char* argVals[]) {
         (Vec2f(healButton->GetPosition().x + PADDING_BIG * 4, healButton->GetPosition().y),
             font, "Prepare", "Assets/blue_button00.png");
 
-    prepareButton->SetButtonAction([&player, &enemy, &textAreaText]() {
-        if (player->hasCurrentTurn) {
+    prepareButton->SetButtonAction([&player, &enemy, &textAreaText, &isFightActive]() {
+        if (isFightActive == true && player->hasCurrentTurn) {
             player->Prepare(*enemy);
             player->ToggleActiveTurn();
             enemy->ToggleActiveTurn();
@@ -367,8 +401,8 @@ int main(int argCount, char* argVals[]) {
         (Vec2f(prepareButton->GetPosition().x + PADDING_BIG * 4, prepareButton->GetPosition().y),
             font, "Cast Magic", "Assets/blue_button00.png");
 
-    castMagicButton->SetButtonAction([&player, &enemy, &textAreaText]() {
-        if (player->hasCurrentTurn) {
+    castMagicButton->SetButtonAction([&player, &enemy, &textAreaText, &isFightActive]() {
+        if (isFightActive == true && player->hasCurrentTurn) {
             int dmg = player->CastMagic(*enemy);
             player->ToggleActiveTurn();
             enemy->ToggleActiveTurn();
@@ -393,15 +427,29 @@ int main(int argCount, char* argVals[]) {
             font, "Quit Battle", "Assets/blue_button00.png");
 
 
-    quitBattleButton->SetButtonAction([&mainMenu, &handler]() {
-        // highscore update stuff
+    quitBattleButton->SetButtonAction([&handler, &isFightActive, &hasPlayerWon, &player, &scores, &score]() {
+        if (isFightActive == false && hasPlayerWon == false) {
+            scores->TryAddHighscore(score, player->GetName());
+            score = 0;
+            scores->ExportScores();
+        }
 
+        player->activeLabel.SetText("");
+        player->hpLabel.SetText("");
+        player->sanityLabel.SetText("");
+
+        hasPlayerWon = false;
+
+        /**
         while (handler->currentScene().GetIdentifier() != "menuScene") {
             //printf_s((handler->currentScene().GetIdentifier() + " is scene before pop.\n").c_str());
             handler->PopCurrentScene();
             //printf_s((handler->currentScene().GetIdentifier() + " is scene after pop.\n").c_str());
         }
+        /**/
 
+        handler->PopCurrentScene();
+        handler->PopCurrentScene();
         });
  
     // ---- END SCENE 3 ----
@@ -439,6 +487,7 @@ int main(int argCount, char* argVals[]) {
     charMenu->AddGameObject(*witsIncButton);
     charMenu->AddGameObject(*randButton);
     charMenu->AddGameObject(*errorText);
+    charMenu->AddGameObject(*cancelButton);
     charMenu->AddGameObject(*fightButton);
 
     fightScreen->AddGameObject(*background);
@@ -464,73 +513,96 @@ int main(int argCount, char* argVals[]) {
                 window.close();
             }
 
-            
-            /** ENEMY RANDOMIZED/AUTOMATIC ACTIONS HANDLE **/
-            if (handler->currentScene().GetIdentifier() == (*fightScreen.get()).GetIdentifier()
-                && enemy->hasCurrentTurn == true) {
-                if (event.type == sf::Event::MouseButtonPressed &&
-                    event.mouseButton.button == sf::Mouse::Button::Left) {
+            if (isFightActive == true) {
+                int playerHP = player->GetStat(Character::CharStat::CurHP);
+                if (playerHP <= 0) {
+                    // hack to set stat to 0 (funnily, it doesn't care)
+                    player->IncrementStat(Character::CharStat::CurHP, playerHP);
 
-                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-                    sf::Vector2u position = window.getSize();
+                    textAreaText->SetText(player->GetName() + " died! Game Over!\nScore: " + std::to_string(score));
+                    isFightActive = false;
+                    hasPlayerWon = false;
+                }
 
-                    if (mousePosition.x >= 0 && mousePosition.x <= position.x &&
-                        mousePosition.y >= 0 && mousePosition.y <= position.y) {
-                        int d100 = rand() % 100;
-                        printf_s("\nD100: %i", d100);
+                int enemyHP = enemy->GetStat(Character::CharStat::CurHP);
+                if (enemyHP <= 0) {
+                    //printf_s(("\nEnemyHP on death: " + std::to_string(enemyHP)).c_str());
+                    enemy->IncrementStat(Character::CharStat::CurHP, enemyHP);
 
-                        if (d100 < PERCENT_ATK) {
-                            int dmg = enemy->Attack(*player);
-                            player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
-                                + "/" + std::to_string(player->GetStat(Character::CharStat::MaxHP)));
+                    score++;
+                    textAreaText->SetText(enemy->GetName() + " died! Score: " + std::to_string(score) + 
+                        "\nProceed to next battle by pressing 'Attack'. ");
+                    isFightActive = false;
+                    hasPlayerWon = true;
+                }
 
-                            if (dmg > 0) {
-                                textAreaText->SetText(enemy->GetName() + " attacked for " + std::to_string(dmg) + " damage.");
+                /** ENEMY RANDOMIZED/AUTOMATIC ACTIONS HANDLE **/
+                if (handler->currentScene().GetIdentifier() == (*fightScreen.get()).GetIdentifier()
+                    && enemy->hasCurrentTurn == true) {
+                    if (event.type == sf::Event::MouseButtonPressed &&
+                        event.mouseButton.button == sf::Mouse::Button::Left) {
+
+                        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                        sf::Vector2u position = window.getSize();
+
+                        if (mousePosition.x >= 0 && mousePosition.x <= position.x &&
+                            mousePosition.y >= 0 && mousePosition.y <= position.y) {
+                            int d100 = rand() % 100;
+                            printf_s("\nD100: %i", d100);
+
+                            if (d100 < PERCENT_ATK) {
+                                int dmg = enemy->Attack(*player);
+                                player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
+                                    + "/" + std::to_string(player->GetStat(Character::CharStat::MaxHP)));
+
+                                if (dmg > 0) {
+                                    textAreaText->SetText(enemy->GetName() + " attacked for " + std::to_string(dmg) + " damage.");
+                                }
+                                else textAreaText->SetText(enemy->GetName() + "'s attack missed!");
                             }
-                            else textAreaText->SetText(enemy->GetName() + "'s attack missed!");
-                        }
-                        else if (d100 >= PERCENT_ATK && d100 < PERCENT_ATK + PERCENT_PREPARE) {
-                            enemy->Prepare(*player);
+                            else if (d100 >= PERCENT_ATK && d100 < PERCENT_ATK + PERCENT_PREPARE) {
+                                enemy->Prepare(*player);
 
-                            textAreaText->SetText(enemy->GetName() + " retreats and prepares for the next move!");
-                        }
-                        else if (d100 >= PERCENT_ATK + PERCENT_PREPARE
-                            && d100 < PERCENT_ATK + PERCENT_PREPARE + PERCENT_RECOVER) {
-                            Vec2i heals = enemy->Heal();
-                            enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
-                                + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
-                            enemy->sanityLabel.SetText("Sanity: " + std::to_string(enemy->GetStat(Character::CharStat::CurSanity))
-                                + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxSanity)));
-
-                            if (heals.x > 0 && heals.y > 0) {
-                                textAreaText->SetText(enemy->GetName() + " healed for " + std::to_string(heals.x) + " HP and "
-                                    + std::to_string(heals.y) + " sanity.");
+                                textAreaText->SetText(enemy->GetName() + " retreats and prepares for the next move!");
                             }
-                            else textAreaText->SetText(enemy->GetName() + " tried to heal but failed.");
-                        }
-                        else if (d100 >= PERCENT_ATK + PERCENT_PREPARE + PERCENT_RECOVER
-                            && d100 < PERCENT_ATK + PERCENT_PREPARE + PERCENT_RECOVER + PERCENT_CASTMAGIC) {
-                            int dmg = enemy->CastMagic(*player);
-                            player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
-                                + "/" + std::to_string(player->GetStat(Character::CharStat::MaxHP)));
-                            player->sanityLabel.SetText("Sanity: " + std::to_string(player->GetStat(Character::CharStat::CurSanity))
-                                + "/" + std::to_string(player->GetStat(Character::CharStat::MaxSanity)));
-                            enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
-                                + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
-                            enemy->sanityLabel.SetText("Sanity: " + std::to_string(enemy->GetStat(Character::CharStat::CurSanity))
-                                + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxSanity)));
+                            else if (d100 >= PERCENT_ATK + PERCENT_PREPARE
+                                && d100 < PERCENT_ATK + PERCENT_PREPARE + PERCENT_RECOVER) {
+                                Vec2i heals = enemy->Heal();
+                                enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
+                                    + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
+                                enemy->sanityLabel.SetText("Sanity: " + std::to_string(enemy->GetStat(Character::CharStat::CurSanity))
+                                    + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxSanity)));
 
-                            if (dmg >= 0) textAreaText->SetText(enemy->GetName() + " cast magic for " + std::to_string(dmg) + " damage.");
-                            else textAreaText->SetText(enemy->GetName() + " cast magic but failed!\nSanity reduced by 1!");
-                        }
-                        else {
-                            textAreaText->SetText(enemy->GetName() + " trembles in fear, losing its turn!");
-                        }
+                                if (heals.x > 0 && heals.y > 0) {
+                                    textAreaText->SetText(enemy->GetName() + " healed for " + std::to_string(heals.x) + " HP and "
+                                        + std::to_string(heals.y) + " sanity.");
+                                }
+                                else textAreaText->SetText(enemy->GetName() + " tried to heal but failed.");
+                            }
+                            else if (d100 >= PERCENT_ATK + PERCENT_PREPARE + PERCENT_RECOVER
+                                && d100 < PERCENT_ATK + PERCENT_PREPARE + PERCENT_RECOVER + PERCENT_CASTMAGIC) {
+                                int dmg = enemy->CastMagic(*player);
+                                player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
+                                    + "/" + std::to_string(player->GetStat(Character::CharStat::MaxHP)));
+                                player->sanityLabel.SetText("Sanity: " + std::to_string(player->GetStat(Character::CharStat::CurSanity))
+                                    + "/" + std::to_string(player->GetStat(Character::CharStat::MaxSanity)));
+                                enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
+                                    + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
+                                enemy->sanityLabel.SetText("Sanity: " + std::to_string(enemy->GetStat(Character::CharStat::CurSanity))
+                                    + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxSanity)));
 
-                        player->ToggleActiveTurn();
-                        enemy->ToggleActiveTurn();
-                        player->activeLabel.SetText("Active: " + std::to_string(player->hasCurrentTurn));
-                        enemy->activeLabel.SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
+                                if (dmg >= 0) textAreaText->SetText(enemy->GetName() + " cast magic for " + std::to_string(dmg) + " damage.");
+                                else textAreaText->SetText(enemy->GetName() + " cast magic but failed!\nSanity reduced by 1!");
+                            }
+                            else {
+                                textAreaText->SetText(enemy->GetName() + " trembles in fear, losing its turn!");
+                            }
+
+                            player->hasCurrentTurn = true;
+                            enemy->hasCurrentTurn = false;
+                            player->activeLabel.SetText("Active: " + std::to_string(player->hasCurrentTurn));
+                            enemy->activeLabel.SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
+                        }
                     }
                 }
             }
