@@ -9,12 +9,16 @@
 #include <time.h>
 #include "Character.hpp"
 
-#define OFFSET Vec2f(-25.0f, 50.0f)
+#define OFFSETX -25.0f
+#define OFFSETY 50.0f
 
 Character::Character(Vec2f startPosition, sf::Font& startFont, std::string nameText, std::string textureFilename,
 					 int totalSP, bool isPlayerChar) :
-	charName(startPosition + OFFSET, startFont, nameText), charSprite(startPosition, textureFilename),
-	totalSkillPoints(totalSP), isPlayer(isPlayerChar) {
+	charName(startPosition + Vec2f(OFFSETX, OFFSETY), startFont, nameText),
+	charSprite(startPosition, textureFilename), totalSkillPoints(totalSP), isPlayer(isPlayerChar),
+	activeLabel(startPosition + Vec2f(OFFSETX, OFFSETY * 2), startFont),
+	hpLabel(startPosition + Vec2f(OFFSETX, OFFSETY * 3), startFont),
+	sanityLabel(startPosition + Vec2f(OFFSETX, OFFSETY * 4), startFont) {
 	if (isPlayer == false) {
 		this->RandomizeStats();
 		//printf_s("\nEnemy strength: %i", this->strPoints);
@@ -55,6 +59,12 @@ int Character::GetStat(Character::CharStat stat) const {
 			break;
 		case Character::CharStat::MaxHP:
 			return this->maxHP;
+			break;
+		case Character::CharStat::CurSanity:
+			return this->sanity;
+			break;
+		case Character::CharStat::MaxSanity:
+			return this->maxSanity;
 			break;
 		default:
 			break;
@@ -286,7 +296,7 @@ void Character::Attack(Character& other) {
 
 	else {
 		other.wasAttackedLastTurn = false;
-		//printf_s("\nOther was not attacked this turn.");
+		printf_s("\nOther was not attacked this turn.");
 	}
 }
 
@@ -333,4 +343,8 @@ void Character::ExportCharacter(void) {
 void Character::Render(sf::RenderWindow& window) {
 	this->charName.Render(window);
 	this->charSprite.Render(window);
+
+	this->activeLabel.Render(window);
+	this->hpLabel.Render(window);
+	this->sanityLabel.Render(window);
 }

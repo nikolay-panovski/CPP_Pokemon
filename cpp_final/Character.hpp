@@ -61,8 +61,6 @@ class Character : public GameObject {
 		int maxSanity = 0;
 		int sanity = 0;
 
-		// secondary stat here
-
 		bool isPlayer;
 		
 
@@ -81,6 +79,11 @@ class Character : public GameObject {
 			CurSanity,
 			MaxSanity
 		};
+
+		// ...the following is still way better than keeping the labels in main(). even though public is not cool.
+		TextObject activeLabel;
+		TextObject hpLabel;
+		TextObject sanityLabel;
 
 	public:
 		Character(Vec2f startPosition, sf::Font& startFont, std::string nameText, std::string textureFilename,

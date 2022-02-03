@@ -64,9 +64,9 @@ int main(int argCount, char* argVals[]) {
     std::unique_ptr<Scene> charMenu = std::make_unique<Scene>("charCreateScene");
     std::unique_ptr<Scene> fightScreen = std::make_unique<Scene>("fightScene");
 
-    std::unique_ptr<Character> player = std::make_unique<Character>(Vec2f(PADDING_BIG, window.getSize().y * 0.5f),
+    std::unique_ptr<Character> player = std::make_unique<Character>(Vec2f(PADDING_BIG * 2, window.getSize().y * 0.5f - PADDING_BIG),
                     font, "Player", "Assets/rpgcritters2_1.png", 8, true);
-    std::unique_ptr<Character> enemy = std::make_unique<Character>(Vec2f(window.getSize().x - PADDING_BIG, window.getSize().y * 0.5f),
+    std::unique_ptr<Character> enemy = std::make_unique<Character>(Vec2f(window.getSize().x - PADDING_BIG * 4, window.getSize().y * 0.5f - PADDING_BIG),
                     font, "Enemy", "Assets/rpgcritters2_4.png", 6, false);
     // ---- END GLOBAL OBJECTS ----
 
@@ -112,7 +112,7 @@ int main(int argCount, char* argVals[]) {
     // ---- END SCENE 1 ----
 
 
-    // ---- SCENE 2 OBJECTS ----
+    // ---- SCENE 2 OBJECTS + SCENE 3 INFOS UPDATED ON FIGHT ENTER ----
     std::unique_ptr<Button> sprArrayDecButton = std::make_unique<Button>
         (Vec2f(charSprites.GetPosition().x - PADDING_BIG, charSprites.GetPosition().y),
                font, "", "Assets/grey_arrowDownGrey.png");
@@ -236,6 +236,17 @@ int main(int argCount, char* argVals[]) {
         (Vec2f(window.getSize().x * 0.5f, window.getSize().y * 0.5f + PADDING_BIG * 4),
                font, "");
 
+    /* OBSOLETING BY MOVING TO CHARACTER CLASS
+     * In this section, labels from scene 3, not 2, are placed.
+     * This is because character stats are defined in scene 2 and not earlier,
+     * and are only updated when the "Fight" button in scene 2 is clicked.
+     * This results in all stats in strings being shown as 0 until an action is taken,
+     * unless the "Fight" button also calls for setting the texts.
+     * (Main architectural problem for this one being that there is no event system,
+     * AND in its absence the labels are not within the characters.)
+     * Possible way to change that would include setting the text every frame, in an Update method.
+     */
+
     std::unique_ptr<Button> fightButton = std::make_unique<Button>
         (Vec2f(window.getSize().x - DEFAULT_BTN_SIZE.x - PADDING_BIG,
                window.getSize().y - DEFAULT_BTN_SIZE.y - PADDING_SMALL),
@@ -251,6 +262,18 @@ int main(int argCount, char* argVals[]) {
             player->CompareFightStartAgil(*enemy);
             player->VerifyStatsFromCharPts();
             enemy->VerifyStatsFromCharPts();
+
+            player->activeLabel.SetText("Active: " + std::to_string(player->hasCurrentTurn));
+            enemy->activeLabel.SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
+            player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
+                + "/" + std::to_string(player->GetStat(Character::CharStat::MaxHP)));
+            enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
+                + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
+            player->sanityLabel.SetText("Sanity: " + std::to_string(player->GetStat(Character::CharStat::CurSanity))
+                + "/" + std::to_string(player->GetStat(Character::CharStat::MaxSanity)));
+            enemy->sanityLabel.SetText("Sanity: " + std::to_string(enemy->GetStat(Character::CharStat::CurSanity))
+                + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxSanity)));
+
         }
         else {
             charMenu->AddGameObject(*errorText);
@@ -259,25 +282,19 @@ int main(int argCount, char* argVals[]) {
         
         });
 
-    // ---- END SCENE 2 ----
+    // ---- END SCENE 2 + SCENE 3 INFOS ----
 
-    // ---- SCENE 3 (UNIQUE) OBJECTS ----
-    std::unique_ptr<TextObject> playerActiveLabel = std::make_unique<TextObject>
-        (Vec2f(player->GetPosition().x - PADDING_BIG, player->GetPosition().y + PADDING_BIG * 2),
-            font, "Active: " + std::to_string(player->hasCurrentTurn));
-
-    std::unique_ptr<TextObject> enemyActiveLabel = std::make_unique<TextObject>
-        (Vec2f(enemy->GetPosition().x - PADDING_BIG, enemy->GetPosition().y + PADDING_BIG * 2),
-            font, "Active: " + std::to_string(enemy->hasCurrentTurn));
+    // ---- SCENE 3 (UNIQUE) BUTTONS ----
+    
 
     std::unique_ptr<Button> updateActiveInfoButton = std::make_unique<Button>
         (Vec2f(DEFAULT_BTN_SIZE.x,
             DEFAULT_BTN_SIZE.y + PADDING_BIG * 2),
             font, "UpdateActiveText", "Assets/blue_button00.png");
 
-    updateActiveInfoButton->SetButtonAction([&player, &enemy, &playerActiveLabel, &enemyActiveLabel]() {
-        playerActiveLabel->SetText("Active: " + std::to_string(player->hasCurrentTurn));
-        enemyActiveLabel->SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
+    updateActiveInfoButton->SetButtonAction([&player, &enemy]() {
+        player->activeLabel.SetText("Active: " + std::to_string(player->hasCurrentTurn));
+        enemy->activeLabel.SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
         });
 
     std::unique_ptr<Button> attackButton = std::make_unique<Button>
@@ -288,11 +305,19 @@ int main(int argCount, char* argVals[]) {
     attackButton->SetButtonAction([&player, &enemy]() {
         if (player->hasCurrentTurn) {
             player->Attack(*enemy);
+            enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
+                + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
         }
-        else enemy->Attack(*player);
+        else {
+            enemy->Attack(*player);
+            player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
+                + "/" + std::to_string(player->GetStat(Character::CharStat::MaxHP)));
+        }
 
         player->ToggleActiveTurn();
         enemy->ToggleActiveTurn();
+        player->activeLabel.SetText("Active: " + std::to_string(player->hasCurrentTurn));
+        enemy->activeLabel.SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
         });
 
     std::unique_ptr<Button> healButton = std::make_unique<Button>
@@ -302,11 +327,18 @@ int main(int argCount, char* argVals[]) {
     healButton->SetButtonAction([&player, &enemy]() {
         if (player->hasCurrentTurn) {
             player->Heal();
+            enemy->wasAttackedLastTurn = false;
+            player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
+                + "/" + std::to_string(player->GetStat(Character::CharStat::MaxHP)));
+            player->sanityLabel.SetText("Sanity: " + std::to_string(player->GetStat(Character::CharStat::CurSanity))
+                + "/" + std::to_string(player->GetStat(Character::CharStat::MaxSanity)));
         }
-        // else... how does enemy react (automatically)?
+        // else... how does enemy react (automatically) (applies to all actions)?
 
         player->ToggleActiveTurn();
         enemy->ToggleActiveTurn();
+        player->activeLabel.SetText("Active: " + std::to_string(player->hasCurrentTurn));
+        enemy->activeLabel.SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
         });
 
     std::unique_ptr<Button> prepareButton = std::make_unique<Button>
@@ -322,6 +354,11 @@ int main(int argCount, char* argVals[]) {
             player->wasAttackedLastTurn = false;
             // display/update text
         }
+
+        player->ToggleActiveTurn();
+        enemy->ToggleActiveTurn();
+        player->activeLabel.SetText("Active: " + std::to_string(player->hasCurrentTurn));
+        enemy->activeLabel.SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
         });
 
     std::unique_ptr<Button> castMagicButton = std::make_unique<Button>
@@ -335,6 +372,19 @@ int main(int argCount, char* argVals[]) {
         else {
             enemy->CastMagic(*player);
         }
+
+        player->ToggleActiveTurn();
+        enemy->ToggleActiveTurn();
+        player->activeLabel.SetText("Active: " + std::to_string(player->hasCurrentTurn));
+        enemy->activeLabel.SetText("Active: " + std::to_string(enemy->hasCurrentTurn));
+        player->hpLabel.SetText("HP: " + std::to_string(player->GetStat(Character::CharStat::CurHP))
+            + "/" + std::to_string(player->GetStat(Character::CharStat::MaxHP)));
+        player->sanityLabel.SetText("Sanity: " + std::to_string(player->GetStat(Character::CharStat::CurSanity))
+            + "/" + std::to_string(player->GetStat(Character::CharStat::MaxSanity)));
+        enemy->hpLabel.SetText("HP: " + std::to_string(enemy->GetStat(Character::CharStat::CurHP))
+            + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxHP)));
+        enemy->sanityLabel.SetText("Sanity: " + std::to_string(enemy->GetStat(Character::CharStat::CurSanity))
+            + "/" + std::to_string(enemy->GetStat(Character::CharStat::MaxSanity)));
         });
 
     std::unique_ptr<Button> quitBattleButton = std::make_unique<Button>
@@ -385,8 +435,6 @@ int main(int argCount, char* argVals[]) {
     fightScreen->AddGameObject(*background);
     fightScreen->AddGameObject(*player);
     fightScreen->AddGameObject(*enemy);
-    fightScreen->AddGameObject(*playerActiveLabel);     // debug
-    fightScreen->AddGameObject(*enemyActiveLabel);       // debug
     fightScreen->AddGameObject(*updateActiveInfoButton);       // debug
     fightScreen->AddGameObject(*attackButton);
     fightScreen->AddGameObject(*healButton);
