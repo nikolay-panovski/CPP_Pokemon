@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 
 typedef sf::Vector2f Vec2f;
+typedef sf::Vector2i Vec2i;
 
 class GameObject {
 	//private:

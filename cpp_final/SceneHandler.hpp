@@ -14,7 +14,7 @@ class SceneHandler {
         void RenderCurrentScene(sf::RenderWindow& window);
         //void UpdateCurrentScene();
 
-        void AddScene(Scene& sceneToAdd);
+        void AddScene(Scene* sceneToAdd);
         void PopCurrentScene(void);
         Scene currentScene(void) const;
 };

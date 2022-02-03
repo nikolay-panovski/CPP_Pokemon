@@ -18,8 +18,9 @@ void SceneHandler::UpdateCurrentScene(void) {
 }
 /**/
 
-void SceneHandler::AddScene(Scene& sceneToAdd) {
-	this->scenes.push(&sceneToAdd);
+void SceneHandler::AddScene(Scene* sceneToAdd) {
+	//printf_s(("Adding scene: " + sceneToAdd->GetIdentifier() + "\n").c_str());
+	this->scenes.push(sceneToAdd);
 }
 
 void SceneHandler::PopCurrentScene(void) {

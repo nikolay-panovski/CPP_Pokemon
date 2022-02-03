@@ -92,6 +92,7 @@ class Character : public GameObject {
 
 		Vec2f GetPosition(void) const override;
 		void SetPosition(Vec2f newPosition) override;
+		std::string GetName(void) const;
 
 		int GetStat(Character::CharStat stat) const;
 		void IncrementStat(Character::CharStat stat);
@@ -105,9 +106,10 @@ class Character : public GameObject {
 		void VerifyStatsFromCharPts(void);
 
 		void ToggleActiveTurn(void);
-		void Attack(Character& other);
-		void Heal(void);
-		void CastMagic(Character& other);
+		int Attack(Character& other);
+		Vec2i Heal(void);
+		int CastMagic(Character& other);
+		void Prepare(Character& other);
 
 		void ExportCharacter(void);
 

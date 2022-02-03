@@ -38,6 +38,10 @@ void Character::SetPosition(Vec2f newPosition) {
 	this->charSprite.SetPosition(newPosition);
 }
 
+std::string Character::GetName(void) const {
+	return this->charName.GetText();
+}
+
 /* DIRECT STATS FUNCTIONS */
 
 int Character::GetStat(Character::CharStat stat) const {
@@ -266,7 +270,7 @@ void Character::ToggleActiveTurn(void) {
 	this->hasCurrentTurn ^= true;
 }
 
-void Character::Attack(Character& other) {
+int Character::Attack(Character& other) {
 	if (rand() % 100 >= other.agilPoints * 10) {
 		int component1 = this->strPoints;
 		int component2;
@@ -282,31 +286,36 @@ void Character::Attack(Character& other) {
 			else component2 = std::max(2, this->agilPoints * 2);
 		}
 
-		other.DecrementStat(Character::CharStat::CurHP,
-			std::max(component1 + component2 - component3, 1));
+		int finalDmg = std::max(component1 + component2 - component3, 1);
+
+		other.DecrementStat(Character::CharStat::CurHP, finalDmg);
 
 		other.wasAttackedLastTurn = true;
 
 		//printf_s("\ncomponent1 = %i", component1);
 		//printf_s("\ncomponent2 = %i", component2);
 		//printf_s("\ncomponent3 = %i", component3);
-		//printf_s("\nPlayer HP: %i", this->hp);
-		//printf_s("\nEnemy HP: %i", other.hp);
+		printf_s("\nPlayer HP: %i", this->hp);
+		printf_s("\nOther HP: %i", other.hp);
+
+		return finalDmg;
 	}
 
 	else {
 		other.wasAttackedLastTurn = false;
-		printf_s("\nOther was not attacked this turn.");
+		return 0;
 	}
 }
 
-void Character::Heal(void) {
+Vec2i Character::Heal(void) {
+	int hpHeal = rand() % 4;
+	int sanHeal = rand() % 2 + 1;
+
 	if (rand() % 100 < ceil(this->witsPoints * 1.5f) * 11) {
-		this->IncrementStat(Character::CharStat::CurHP, rand() % 4);
-		this->IncrementStat(Character::CharStat::CurSanity, rand() % 2 + 1);
-		printf_s("Heal successful.");
+		this->IncrementStat(Character::CharStat::CurHP, hpHeal);
+		this->IncrementStat(Character::CharStat::CurSanity, sanHeal);
 	}
-	else printf_s("Heal failed.");
+	else return Vec2i(-1, -1);
 	
 	// this is not best suited for here
 	if (this->sanity > this->maxSanity) this->sanity = this->maxSanity;
@@ -314,13 +323,22 @@ void Character::Heal(void) {
 
 	printf_s("\nPlayer HP: %i", this->hp);
 	printf_s("\nPlayer Sanity: %i", this->sanity);
+
+	return Vec2i(hpHeal, sanHeal);
 }
 
-void Character::CastMagic(Character& other) {
+int Character::CastMagic(Character& other) {
 	int dmg = this->witsPoints + (rand() % 8 - 3);
 
 	if (dmg >= 0) other.DecrementStat(Character::CharStat::CurHP, dmg);
 	else this->DecrementStat(Character::CharStat::CurSanity);
+
+	return dmg;
+}
+
+// other required. no comment.
+void Character::Prepare(Character& other) {
+	other.wasAttackedLastTurn = false;
 }
 /* END FIGHT ACTIONS FUNCTIONS */
 
