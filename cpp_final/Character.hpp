@@ -68,7 +68,8 @@ class Character : public GameObject {
 
 	public:
 		bool hasCurrentTurn = false;
-		bool wasAttackedLastTurn = false;
+		// dirtiest possible way to not apply attack formula bonus at the start of a battle
+		bool wasAttackedLastTurn = true;
 
 		enum class CharStat : int {
 			SkillPts,
@@ -103,6 +104,7 @@ class Character : public GameObject {
 		void ToggleActiveTurn(void);
 		void Attack(Character& other);
 		void Heal(void);
+		void CastMagic(Character& other);
 
 		void ExportCharacter(void);
 

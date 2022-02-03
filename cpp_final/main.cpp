@@ -313,16 +313,28 @@ int main(int argCount, char* argVals[]) {
         (Vec2f(healButton->GetPosition().x + PADDING_BIG * 4, healButton->GetPosition().y),
             font, "Prepare", "Assets/blue_button00.png");
 
-    prepareButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
-
+    prepareButton->SetButtonAction([&player, &enemy]() {
+        if (player->hasCurrentTurn) {
+            enemy->wasAttackedLastTurn = false;
+            // display/update text
+        }
+        else {
+            player->wasAttackedLastTurn = false;
+            // display/update text
+        }
         });
 
     std::unique_ptr<Button> castMagicButton = std::make_unique<Button>
         (Vec2f(prepareButton->GetPosition().x + PADDING_BIG * 4, prepareButton->GetPosition().y),
             font, "Cast Magic", "Assets/blue_button00.png");
 
-    castMagicButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
-
+    castMagicButton->SetButtonAction([&player, &enemy]() {
+        if (player->hasCurrentTurn) {
+            player->CastMagic(*enemy);
+        }
+        else {
+            enemy->CastMagic(*player);
+        }
         });
 
     std::unique_ptr<Button> quitBattleButton = std::make_unique<Button>
