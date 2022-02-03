@@ -68,6 +68,7 @@ class Character : public GameObject {
 
 	public:
 		bool hasCurrentTurn = false;
+		bool wasAttackedLastTurn = false;
 
 		enum class CharStat : int {
 			SkillPts,
@@ -75,7 +76,9 @@ class Character : public GameObject {
 			AgilPts,
 			WitsPts,
 			CurHP,
-			MaxHP
+			MaxHP,
+			CurSanity,
+			MaxSanity
 		};
 
 	public:
@@ -97,7 +100,9 @@ class Character : public GameObject {
 		bool VerifyMinStats(void);
 		void VerifyStatsFromCharPts(void);
 
+		void ToggleActiveTurn(void);
 		void Attack(Character& other);
+		void Heal(void);
 
 		void ExportCharacter(void);
 

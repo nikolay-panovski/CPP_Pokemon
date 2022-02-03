@@ -290,14 +290,23 @@ int main(int argCount, char* argVals[]) {
             player->Attack(*enemy);
         }
         else enemy->Attack(*player);
+
+        player->ToggleActiveTurn();
+        enemy->ToggleActiveTurn();
         });
 
     std::unique_ptr<Button> healButton = std::make_unique<Button>
         (Vec2f(attackButton->GetPosition().x + PADDING_BIG * 4, attackButton->GetPosition().y),
             font, "Heal", "Assets/blue_button00.png");
 
-    healButton->SetButtonAction([&attackButton, &charMenu, &handler]() {
+    healButton->SetButtonAction([&player, &enemy]() {
+        if (player->hasCurrentTurn) {
+            player->Heal();
+        }
+        // else... how does enemy react (automatically)?
 
+        player->ToggleActiveTurn();
+        enemy->ToggleActiveTurn();
         });
 
     std::unique_ptr<Button> prepareButton = std::make_unique<Button>

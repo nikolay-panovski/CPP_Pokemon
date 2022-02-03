@@ -242,10 +242,24 @@ void Character::VerifyStatsFromCharPts(void) {
 
 /* FIGHT ACTIONS FUNCTIONS */
 
+void Character::ToggleActiveTurn(void) {
+	this->hasCurrentTurn ^= true;
+}
+
 void Character::Attack(Character& other) {
 	int component1 = this->strPoints;
-	int component2 = (rand() % 4 + 1);
+	int component2;
 	int component3 = ceil(other.GetStat(Character::CharStat::StrPts) / 2);
+
+	if (wasAttackedLastTurn) {
+		component2 = rand() % 4 + 1;
+	}
+	else {
+		if (this->agilPoints == 0) {
+			component2 = 1;
+		}
+		else component2 = std::max(2, this->agilPoints * 2);
+	}
 
 	other.DecrementStat(Character::CharStat::CurHP, 
 		std::max(component1 + component2 - component3, 1));
@@ -255,6 +269,22 @@ void Character::Attack(Character& other) {
 	//printf_s("\ncomponent3 = %i", component3);
 	//printf_s("\nPlayer HP: %i", this->hp);
 	//printf_s("\nEnemy HP: %i", other.hp);
+}
+
+void Character::Heal(void) {
+	if (rand() % 100 < ceil(this->witsPoints * 1.5f) * 11) {
+		this->IncrementStat(Character::CharStat::CurHP, rand() % 4);
+		this->IncrementStat(Character::CharStat::CurSanity, rand() % 2 + 1);
+		printf_s("Heal successful.");
+	}
+	else printf_s("Heal failed.");
+	
+	// this is not best suited for here
+	if (this->sanity > this->maxSanity) this->sanity = this->maxSanity;
+	if (this->hp > this->maxHP) this->hp = this->maxHP;
+
+	printf_s("\nPlayer HP: %i", this->hp);
+	printf_s("\nPlayer Sanity: %i", this->sanity);
 }
 
 /* END FIGHT ACTIONS FUNCTIONS */
