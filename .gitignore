@@ -3,8 +3,8 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# Added assets
-cpp_final/Assets/
+# Added assets - actually, gotta ship them
+#cpp_final/Assets/
 
 # User-specific files
 *.rsuser
